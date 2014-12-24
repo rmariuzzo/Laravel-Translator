@@ -1,0 +1,23 @@
+{
+    "name": "mariuzzo/laravel-translator",
+    "description": "",
+    "authors": [
+        {
+            "name": "Rubens Mariuzzo",
+            "email": "rubens@mariuzzo.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "4.2.*"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Mariuzzo\\LaravelTranslator\\": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
