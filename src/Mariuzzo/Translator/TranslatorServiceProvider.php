@@ -1,15 +1,20 @@
-<?php namespace Mariuzzo\LaravelTranslator;
+<?php namespace Mariuzzo\Translator;
 
 use Illuminate\Support\ServiceProvider;
 
-class LaravelTranslatorServiceProvider extends ServiceProvider {
+/**
+ * The TranslatorServiceProvider class.
+ *
+ * @author rmariuzzo <rubens@mariuzzo.com>
+ */
+class TranslatorServiceProvider extends ServiceProvider {
 
 	/**
 	 * Indicates if loading of the provider is deferred.
 	 *
 	 * @var bool
 	 */
-	protected $defer = false;
+	protected $defer = true;
 
 	/**
 	 * Bootstrap the application events.
@@ -28,7 +33,10 @@ class LaravelTranslatorServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		//
+		$this->app['translator-start'] = $this->app->share(function ($app) {
+            return new Commands\TranslatorStartCommand;
+        });
+        $this->commands('translator-start');
 	}
 
 	/**
@@ -38,7 +46,7 @@ class LaravelTranslatorServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array();
+		return array('translator-start');
 	}
 
 }

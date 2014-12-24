@@ -12,11 +12,8 @@
         "illuminate/support": "4.2.*"
     },
     "autoload": {
-        "classmap": [
-            "src/migrations"
-        ],
         "psr-0": {
-            "Mariuzzo\\LaravelTranslator\\": "src/"
+            "Mariuzzo\\Translator\\": "src/"
         }
     },
     "minimum-stability": "stable"
