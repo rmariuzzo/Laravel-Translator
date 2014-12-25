@@ -5,11 +5,12 @@ use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem as File;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputArgument;
-
 use Mariuzzo\Translator\Services\TranslatorService;
 
 /**
  * The TranslatorStartCommand class.
+ *
+ * @author rmariuzzo <rubens@mariuzzo.com>
  */
 class TranslatorStartCommand extends Command {
 
@@ -27,12 +28,28 @@ class TranslatorStartCommand extends Command {
 	 */
 	protected $description = 'Start the interactive translator.';
 
+    /**
+     * The Laravel file provider.
+     * @var Illuminate\Support\Facades\File
+     */
     protected $file;
 
+    /**
+     * The Laravel config provider.
+     * @var Illuminate\Support\Facades\Config
+     */
     protected $config;
 
+    /**
+     * The translator service.
+     * @var Mariuzzo\Translator\Services\TranslatorService
+     */
     protected $translator;
 
+    /**
+     * Missing translations.
+     * @var array
+     */
     protected $missing;
 
 	/**
@@ -104,6 +121,11 @@ class TranslatorStartCommand extends Command {
 		return array();
 	}
 
+    /**
+     * Return languages files.
+     *
+     * @return array Array of languages files.
+     */
     protected function getLangFiles()
     {
         $messages = array();
@@ -117,6 +139,12 @@ class TranslatorStartCommand extends Command {
         return $this->file->allFiles($path);
     }
 
+    /**
+     * Flatten missing translation keys by locale.
+     *
+     * @param  array $missing Array of missing translations.
+     * @return array          Flattened array of missing translations.
+     */
     protected function flatten($missing) {
         $flatten = array();
         foreach ($missing as $locale => $source) {
@@ -133,6 +161,11 @@ class TranslatorStartCommand extends Command {
         return $flatten;
     }
 
+    /**
+     * Interactively translate missing translations.
+     *
+     * @return void
+     */
     protected function translate()
     {
         foreach ($this->missing as $locale => &$source) {
@@ -186,6 +219,11 @@ class TranslatorStartCommand extends Command {
         $this->info(' >> No more translation.');
     }
 
+    /**
+     * Check translation status.
+     *
+     * @return void
+     */
     protected function check()
     {
         if (count($this->missing) === 0) {
@@ -203,6 +241,11 @@ class TranslatorStartCommand extends Command {
         }
     }
 
+    /**
+     * Save new translations to disk.
+     *
+     * @return void
+     */
     protected function save()
     {
         $this->info('');

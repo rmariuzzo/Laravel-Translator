@@ -1,41 +1,104 @@
 <?php namespace Mariuzzo\Translator\Services;
 
+/**
+ * The TranslatorService class.
+ *
+ * @author rmariuzzo <rubens@mariuzzo.com>
+ */
 class TranslatorService {
 
+    /**
+     * The translations source.
+     *
+     * @var array
+     */
     protected $source;
+
+    /**
+     * All available locales.
+     *
+     * @var array
+     */
     protected $locales;
+
+    /**
+     * The default locale.
+     *
+     * @var string
+     */
     protected $defaultLocale;
+
+    /**
+     * Missing translations.
+     *
+     * @var array
+     */
     protected $missing;
 
+    /**
+     * Construct a new TranslatorService.
+     *
+     * @param array $files Array of language files.
+     */
     public function __construct($files) {
         $this->setFiles($files);
     }
 
+    /**
+     * Return translations source.
+     *
+     * @return array Translations source.
+     */
     public function getSource()
     {
         return $this->source;
     }
 
+    /**
+     * Return all available locales.
+     *
+     * @return array Available locales.
+     */
     public function getLocales()
     {
         return $this->locales;
     }
 
+    /**
+     * Return the default locale.
+     *
+     * @return string The default locale.
+     */
     public function getDefaultLocale()
     {
         return $this->defaultLocale;
     }
 
+    /**
+     * Set the default locale.
+     *
+     * @param string $locale A locale.
+     */
     public function setDefaultLocale($locale)
     {
         $this->defaultLocale = $locale;
     }
 
+    /**
+     * Return missing translations.
+     *
+     * @return array Missing translations.
+     */
     public function getMissing()
     {
         return $this->missing;
     }
 
+    /**
+     * Set languages files.
+     *
+     * @param array $files Languages files.
+     */
     public function setFiles($files)
     {
         $this->parse($files);
@@ -43,6 +106,13 @@ class TranslatorService {
         $this->check();
     }
 
+    /**
+     * Parse languages files.
+     *
+     * @param  array $files Language files.
+     *
+     * @return void
+     */
     protected function parse($files)
     {
         foreach ($files as $file) {
@@ -62,6 +132,11 @@ class TranslatorService {
         }
     }
 
+    /**
+     * Check for missing translations.
+     *
+     * @return void
+     */
     protected function check()
     {
         $this->missing = array();
@@ -85,6 +160,15 @@ class TranslatorService {
         }
     }
 
+    /**
+     * Return a translation message.
+     *
+     * @param  string $locale A locale.
+     * @param  string $key    A key.
+     * @param  string $line   A line.
+     *
+     * @return string         A translation message.
+     */
     public function get($locale, $key, $line)
     {
         if (!isset($this->source[$locale])) {
@@ -99,6 +183,16 @@ class TranslatorService {
         return $this->source[$locale][$key]['lines'][$line];
     }
 
+    /**
+     * Put a translation.
+     *
+     * @param  string $locale The locale.
+     * @param  string $key    The key.
+     * @param  string $line   The line.
+     * @param  string $value  The translation value.
+     *
+     * @return void
+     */
     public function put($locale, $key, $line, $value)
     {
         $this->source[$locale][$key]['lines'][$line] = $value;
