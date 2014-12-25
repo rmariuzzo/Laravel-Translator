@@ -1,12 +1,21 @@
 {
     "name": "mariuzzo/laravel-translator",
-    "description": "",
-    "authors": [
-        {
-            "name": "Rubens Mariuzzo",
-            "email": "rubens@mariuzzo.com"
-        }
-    ],
+    "description": "Laravel command that interactively helps you translate missing keys.",
+    "version": "1.0.0",
+    "type": "library",
+    "keywords": ["laravel", "localization", "translation", "translator", "cli", "command"],
+    "homepage": "https://github.com/rmariuzzo/Laravel-Translator",
+    "license": "MIT",
+    "authors": [{
+        "name": "Rubens Mariuzzo",
+        "email": "rubens@mariuzzo.com",
+        "homepage": "https://github.com/rmariuzzo",
+        "role": "Developer"
+    }],
+    "support": {
+        "issues": "https://github.com/rmariuzzo/Laravel-Translator/issues",
+        "source": "https://github.com/rmariuzzo/Laravel-Translator"
+    },
     "require": {
         "php": ">=5.4.0",
         "illuminate/support": "4.2.*"
