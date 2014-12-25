@@ -33,10 +33,10 @@ class TranslatorServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		$this->app['translator-start'] = $this->app->share(function ($app) {
-            return new Commands\TranslatorStartCommand;
+		$this->app['translator.command.start'] = $this->app->share(function ($app) {
+            return new Commands\TranslatorStartCommand($app['files'], $app['config']);
         });
-        $this->commands('translator-start');
+        $this->commands('translator.command.start');
 	}
 
 	/**
@@ -46,7 +46,7 @@ class TranslatorServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array('translator-start');
+		return array('translator.command.start');
 	}
 
 }
