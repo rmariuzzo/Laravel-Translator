@@ -80,22 +80,27 @@ class TranslatorStartCommand extends Command {
         $this->check();
 
         // Start interactive shell.
-        while(true) {
+        while(true)
+        {
             $action = strtoupper($this->ask('What do you want to do? [T]ranslate, [C]heck, [S]ave, [E]xit.'));
 
-            if ($action === 'T') {
+            if ($action === 'T')
+            {
                 $this->translate();
             }
 
-            if ($action === 'C') {
+            if ($action === 'C')
+            {
                 $this->check();
             }
 
-            if ($action === 'S') {
+            if ($action === 'S')
+            {
                 $this->save();
             }
 
-            if ($action === 'E') {
+            if ($action === 'E')
+            {
                 exit;
             }
         }
@@ -145,19 +150,25 @@ class TranslatorStartCommand extends Command {
      * @param  array $missing Array of missing translations.
      * @return array          Flattened array of missing translations.
      */
-    protected function flatten($missing) {
+    protected function flatten($missing)
+    {
         $flatten = array();
-        foreach ($missing as $locale => $source) {
-            foreach ($source as $key => $lines) {
-                foreach ($lines as $line) {
+
+        foreach ($missing as $locale => $bundles)
+        {
+            foreach ($bundles as $bundle => $keys)
+            {
+                foreach ($keys as $key)
+                {
                     $flatten[$locale][] = array(
+                        'bundle'     => $bundle,
                         'key'        => $key,
-                        'line'       => $line,
                         'translated' => false
                     );
                 }
             }
         }
+
         return $flatten;
     }
 
@@ -168,51 +179,62 @@ class TranslatorStartCommand extends Command {
      */
     protected function translate()
     {
-        foreach ($this->missing as $locale => &$source) {
-
+        foreach ($this->missing as $locale => &$keys)
+        {
             $count = 0;
-            $total = count($source);
+            $total = count($keys);
 
-            foreach ($source as &$message) {
+            foreach ($keys as &$key)
+            {
                 $count++;
 
-                // Skip already translated messages.
-                if ($message['translated'] === true) continue;
+                // Skip translated key.
+                if ($key['translated'] === true)
+                {
+                    continue;
+                }
 
-                // Get existing sample.
+                // Get sample value.
                 $sampleValue;
                 $sampleLocale;
-                foreach ($this->translator->getLocales() as $l) {
-                    $sampleValue = $this->translator->get($l, $message['key'], $message['line']);
-                    if ($sampleValue !== null) {
-                        $sampleLocale = $l;
+
+                foreach ($this->translator->getLocales() as $l)
+                {
+                    $sampleLocale = $l;
+                    $sampleValue = $this->translator->get($sampleLocale, $key['bundle'], $key['key']);
+
+                    if ($sampleValue !== null)
+                    {
                         break;
                     }
                 }
 
-                $key = $message['key'] . '.' . $message['line'];
+                $name = $key['bundle'] . '.' . $key['key'];
                 $this->info('');
-                $this->info(" - Translating [$key] into [$locale]. [$count/$total]");
+                $this->info(" - Translating [$name] into [$locale]. [$count/$total]");
 
                 // TODO: Handle array values.
-                if (!is_string($sampleValue)) {
+                if (!is_string($sampleValue))
+                {
                     $this->comment(' > Non string value not supported.');
                     continue;
                 }
 
                 $this->info(" - Sample [$sampleLocale]: '$sampleValue'");
-
                 $value = $this->ask(' - Translation (left blank to skip): ');
                 $value = trim($value);
 
-                // Skipe blank values.
-                if ($value === '') {
+                // Skip blank values.
+                if ($value === '')
+                {
                     $this->info(' > Translation skipped!');
-                } else {
-                    $this->translator->put($locale, $message['key'], $message['line'], $value);
-                    $message['translated'] = true;
-                    $this->info(' > Translation added!');
+                    continue;
                 }
+
+                // Save translated key.
+                $this->translator->put($locale, $key['bundle'], $key['key'], $value);
+                $key['translated'] = true;
+                $this->info(' > Translation added!');
             }
         }
 
@@ -226,15 +248,18 @@ class TranslatorStartCommand extends Command {
      */
     protected function check()
     {
-        if (count($this->missing) === 0) {
+        if (count($this->missing) === 0)
+        {
             $this->info('Everything is awesome!');
             exit;
         }
 
-        foreach ($this->missing as $locale => $source) {
-            $message = ' - ['.$locale.'] is missing: '.count($source).' translation entries';
-            $changes = array_filter($source, function($s) {
-                return $s['translated'];
+        foreach ($this->missing as $locale => $keys)
+        {
+            $message = ' - ['.$locale.'] is missing: '.count($keys).' translation entries';
+            $changes = array_filter($keys, function($key)
+            {
+                return $key['translated'];
             });
             $message .= ' ('.count($changes).' unsaved changes).';
             $this->info($message);
@@ -250,14 +275,14 @@ class TranslatorStartCommand extends Command {
     {
         $this->info('');
 
-        foreach ($this->translator->getSource() as $locale => $source) {
-            foreach ($source as $key => $message) {
-                $contents = $output = "<?php\n\nreturn ".var_export($message['lines'], true).";\n";
-                if (!isset($message['path'])) {
-                    $message['path'] = app_path()."/lang/$locale/$key.php";
-                }
-                $this->file->put($message['path'], $contents);
-                $this->info(' > File saved: '.$message['path']);
+        foreach ($this->translator->getTranslations() as $locale => $bundles)
+        {
+            foreach ($bundles as $bundle => $keys)
+            {
+                $path = app_path()."/lang/$locale/$bundle.php";
+                $contents = "<?php\n\nreturn ".var_export($keys, true).";\n";
+                $this->file->put($path, $contents);
+                $this->info(" > File saved: $path");
             }
         }
 

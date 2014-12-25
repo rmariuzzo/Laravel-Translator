@@ -8,11 +8,11 @@
 class TranslatorService {
 
     /**
-     * The translations source.
+     * The translations.
      *
      * @var array
      */
-    protected $source;
+    protected $translations;
 
     /**
      * All available locales.
@@ -40,18 +40,19 @@ class TranslatorService {
      *
      * @param array $files Array of language files.
      */
-    public function __construct($files) {
+    public function __construct($files)
+    {
         $this->setFiles($files);
     }
 
     /**
-     * Return translations source.
+     * Return translations.
      *
-     * @return array Translations source.
+     * @return array Translations.
      */
-    public function getSource()
+    public function getTranslations()
     {
-        return $this->source;
+        return $this->translations;
     }
 
     /**
@@ -102,7 +103,7 @@ class TranslatorService {
     public function setFiles($files)
     {
         $this->parse($files);
-        $this->locales = array_keys($this->source);
+        $this->locales = array_keys($this->translations);
         $this->check();
     }
 
@@ -115,20 +116,21 @@ class TranslatorService {
      */
     protected function parse($files)
     {
-        foreach ($files as $file) {
-            // Only parse PHP files.
+        foreach ($files as $file)
+        {
+            // Filter PHP files.
             $pathName = $file->getRelativePathName();
-            if ( pathinfo($pathName)['extension'] !== 'php' ) continue;
+
+            if ( pathinfo($pathName)['extension'] !== 'php' )
+            {
+                continue;
+            }
 
             $locale = $file->getRelativePath();
-            $key = basename($pathName, '.php');
+            $bundle = basename($pathName, '.php');
+            $keys = include $file->getPathname();
 
-            // Parse languages into array.
-            $this->source[$locale][$key] = array(
-                'path'   => $file->getPathname(),
-                'locale' => $locale,
-                'lines'  => include $file->getPathname()
-            );
+            $this->translations[$locale][$bundle] = $keys;
         }
     }
 
@@ -141,21 +143,35 @@ class TranslatorService {
     {
         $this->missing = array();
 
-        foreach ($this->source as $asource) {
-            foreach ($asource as $akey => $amessage) {
-                foreach (array_keys($amessage['lines']) as $key) {
-                    foreach ($this->source as $blocale => $bsource) {
-                        if (!isset($bsource[$akey]['lines'][$key])) {
-                            $this->missing[$blocale][$akey][] = $key;
+        // Iterate all translation keys.
+        foreach ($this->translations as $bundles_a)
+        {
+            foreach ($bundles_a as $bundle_a => $keys_a)
+            {
+                $keys_a = array_keys($keys_a);
+
+                // Compare each key against all translations.
+                foreach ($keys_a as $key_a)
+                {
+                    foreach ($this->translations as $locale_b => $bundles_b)
+                    {
+
+                        // Check missing keys.
+                        if (!isset($bundles_b[$bundle_a][$key_a]))
+                        {
+                            $this->missing[$locale_b][$bundle_a][] = $key_a;
                         }
                     }
                 }
             }
         }
 
-        foreach ($this->missing as $locale => $source) {
-            foreach ($source as $key => $lines) {
-                $this->missing[$locale][$key] = array_unique($this->missing[$locale][$key]);
+        // Remove duplicated keys.
+        foreach ($this->missing as $locale => $bundles)
+        {
+            foreach ($bundles as $bundle => $entries)
+            {
+                $this->missing[$locale][$bundle] = array_unique($this->missing[$locale][$bundle]);
             }
         }
     }
@@ -163,39 +179,45 @@ class TranslatorService {
     /**
      * Return a translation message.
      *
-     * @param  string $locale A locale.
-     * @param  string $key    A key.
-     * @param  string $line   A line.
+     * @param  string $locale The locale.
+     * @param  string $bundle The bundle.
+     * @param  string $key    The key.
      *
      * @return string         A translation message.
      */
-    public function get($locale, $key, $line)
+    public function get($locale, $bundle, $key)
     {
-        if (!isset($this->source[$locale])) {
+        if (!isset($this->translations[$locale]))
+        {
             return null;
         }
-        if (!isset($this->source[$locale][$key])) {
+
+        if (!isset($this->translations[$locale][$bundle]))
+        {
             return null;
         }
-        if (!isset($this->source[$locale][$key]['lines'][$line])) {
+
+        if (!isset($this->translations[$locale][$bundle][$key]))
+        {
             return null;
         }
-        return $this->source[$locale][$key]['lines'][$line];
+
+        return $this->translations[$locale][$bundle][$key];
     }
 
     /**
      * Put a translation.
      *
      * @param  string $locale The locale.
+     * @param  string $bundle The bundle.
      * @param  string $key    The key.
-     * @param  string $line   The line.
      * @param  string $value  The translation value.
      *
      * @return void
      */
-    public function put($locale, $key, $line, $value)
+    public function put($locale, $bundle, $key, $value)
     {
-        $this->source[$locale][$key]['lines'][$line] = $value;
+        $this->translations[$locale][$bundle][$key] = $value;
     }
 
 }
