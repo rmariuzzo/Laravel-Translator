@@ -96,9 +96,6 @@ class TranslatorStartCommand extends Command {
                 break;
                 case 'E':
                     exit;
-                break;             
-                default:
-                    //Handling anykind of error.
                 break;
             }
         }
