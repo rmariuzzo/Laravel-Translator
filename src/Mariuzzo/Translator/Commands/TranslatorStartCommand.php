@@ -84,24 +84,22 @@ class TranslatorStartCommand extends Command {
         {
             $action = strtoupper($this->ask('What do you want to do? [T]ranslate, [C]heck, [S]ave, [E]xit.'));
 
-            if ($action === 'T')
-            {
-                $this->translate();
-            }
-
-            if ($action === 'C')
-            {
-                $this->check();
-            }
-
-            if ($action === 'S')
-            {
-                $this->save();
-            }
-
-            if ($action === 'E')
-            {
-                exit;
+            switch ($action) {
+                case 'T':
+                    $this->translate();
+                break;
+                case 'C':
+                    $this->check();
+                break;
+                case 'S':
+                    $this->save();
+                break;
+                case 'E':
+                    exit;
+                break;             
+                default:
+                    //Handling anykind of error.
+                break;
             }
         }
 	}
